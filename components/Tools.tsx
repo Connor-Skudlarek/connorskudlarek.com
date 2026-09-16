@@ -4,10 +4,9 @@ import { Card, Section } from "@/components/ui";
 
 export default function Tools() {
   return (
-    <Section id="tools" eyebrow="Smaller things" heading="Odds and ends">
+    <Section id="tools" eyebrow="Smaller things" heading="Tools and side quests">
       <p className="mt-4 max-w-2xl text-lg text-muted">
-        Small projects, side quests, and one that taught me an expensive lesson
-        cheaply.
+        Small things I built because I wanted them to exist.
       </p>
       <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {tools.map((tool) => (

@@ -1,28 +1,33 @@
 @import "tailwindcss";
 
+/* Palette notes: blue-forward, high contrast, cool neutrals.
+   Every accent value below is checked against its background for WCAG AA
+   contrast on small text (>= 4.5:1). See the audit script in scripts/. */
 :root {
-  --background: #fbf7f2;
+  --background: #f7f9fc;
   --surface: #ffffff;
-  --surface-sunk: #f4ece2;
-  --foreground: #2a2320;
-  --muted: #6d6058;
-  --border: #e9ddd0;
-  --accent: #c05621;
-  --accent-soft: #fbe8db;
+  --surface-sunk: #eef2f9;
+  --foreground: #0f1b2d;
+  --muted: #55637a;
+  --border: #dce4f0;
+  --accent: #1355c7;
+  --accent-soft: #dce9ff;
   --accent-contrast: #ffffff;
+  --signal: #0f7b7b;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #17130f;
-    --surface: #211b16;
-    --surface-sunk: #1b1611;
-    --foreground: #f3ece4;
-    --muted: #ab9c8e;
-    --border: #362b22;
-    --accent: #f0964f;
-    --accent-soft: #33231a;
-    --accent-contrast: #1a120c;
+    --background: #0d1420;
+    --surface: #151e2d;
+    --surface-sunk: #111a27;
+    --foreground: #eef3fa;
+    --muted: #9aabc2;
+    --border: #263345;
+    --accent: #6aa8ff;
+    --accent-soft: #16283f;
+    --accent-contrast: #08111d;
+    --signal: #4bc4bd;
   }
 }
 
@@ -36,8 +41,9 @@
   --color-accent: var(--accent);
   --color-accent-soft: var(--accent-soft);
   --color-accent-contrast: var(--accent-contrast);
+  --color-signal: var(--signal);
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-display: var(--font-display-face), "Segoe UI", system-ui, sans-serif;
   --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
 }
 

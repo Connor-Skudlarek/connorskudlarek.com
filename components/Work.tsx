@@ -8,20 +8,26 @@ export default function Work() {
   return (
     <Section id="work" eyebrow="Selected work" heading="Things I've built">
       <p className="mt-4 max-w-2xl text-lg text-muted">
-        Two projects with real users and real constraints, plus one I made
-        because the internet was making me grouchy.
+        Each of these is here because it shows something different: leading a
+        team, applying domain knowledge, and getting a model to run where the
+        data never leaves the machine.
       </p>
 
       <div className="mt-10 space-y-6">
         {featured.map((project) => (
           <Card key={project.slug}>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.14em] text-accent">
+              {project.demonstrates}
+            </p>
             <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
               <h3 className="font-display text-2xl font-semibold tracking-tight">
                 {project.title}
               </h3>
               <p className="text-sm font-medium text-accent">{project.role}</p>
             </div>
-            <p className="mt-1 text-lg text-muted">{project.subtitle}</p>
+            <p className="mt-1 text-lg text-muted">
+              {project.subtitle}
+            </p>
             <p className="mt-4 leading-relaxed">{project.blurb}</p>
 
             {project.metrics ? (
