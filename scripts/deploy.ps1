@@ -8,19 +8,24 @@
     needs no Apache reload, so a deploy never leaves the site half-updated.
 
     Rollback: ssh in and point the symlink at an older release directory.
-      ln -sfn /home/bitnami/www/releases/<older> /home/bitnami/www/current
+      ln -sfn $DEPLOY_ROOT/releases/<older> $DEPLOY_ROOT/current
 #>
 [CmdletBinding()]
 param(
-    [string]$KeyPath = "$env:USERPROFILE\.ssh\lightsail.pem",
-    [string]$Server = "bitnami@54.70.47.58",
-    [string]$Root = "/home/bitnami/www",
+    [string]$KeyPath = $env:DEPLOY_KEY,
+    [string]$Server = $env:DEPLOY_SERVER,
+    [string]$Root = $env:DEPLOY_ROOT,
     [int]$KeepReleases = 5,
     [switch]$SkipBuild
 )
 
 $ErrorActionPreference = "Stop"
+foreach ($pair in @(@("DEPLOY_SERVER", $Server), @("DEPLOY_KEY", $KeyPath), @("DEPLOY_ROOT", $Root))) {
+    if ([string]::IsNullOrWhiteSpace($pair[1])) { throw "Set $($pair[0]) (or pass the matching parameter)" }
+}
 $ssh = "$env:WINDIR\System32\OpenSSH\ssh.exe"
+$scp = "$env:WINDIR\System32\OpenSSH\scp.exe"
+$tar = "$env:WINDIR/System32/tar.exe"
 $repo = Split-Path -Parent $PSScriptRoot
 
 if (-not (Test-Path $KeyPath)) {
@@ -47,10 +52,22 @@ Write-Host "Uploading release $stamp..." -ForegroundColor Cyan
 & $ssh -i $KeyPath $Server "mkdir -p '$release'"
 if ($LASTEXITCODE -ne 0) { throw "Could not create release directory" }
 
-# tar over ssh: one round trip, and it preserves the directory tree without
-# needing rsync (which Windows does not ship).
-tar czf - -C $out . | & $ssh -i $KeyPath $Server "tar xzf - -C '$release'"
-if ($LASTEXITCODE -ne 0) { throw "Upload failed" }
+# Stage the archive on disk rather than piping tar into ssh: PowerShell's
+# pipeline carries text, not raw bytes, and corrupts the stream.
+$archive = Join-Path ([System.IO.Path]::GetTempPath()) "portfolio-$stamp.tgz"
+try {
+    & $tar czf $archive -C $out .
+    if ($LASTEXITCODE -ne 0) { throw "Could not create archive" }
+
+    & $scp -i $KeyPath $archive "${Server}:/tmp/deploy.tgz"
+    if ($LASTEXITCODE -ne 0) { throw "Upload failed" }
+
+    & $ssh -i $KeyPath $Server "tar xzf /tmp/deploy.tgz -C '$release' && rm -f /tmp/deploy.tgz"
+    if ($LASTEXITCODE -ne 0) { throw "Remote extract failed" }
+}
+finally {
+    Remove-Item $archive -ErrorAction SilentlyContinue
+}
 
 Write-Host "Activating..." -ForegroundColor Cyan
 & $ssh -i $KeyPath $Server "ln -sfn '$release' '$Root/current'"
@@ -60,7 +77,13 @@ if ($LASTEXITCODE -ne 0) { throw "Symlink flip failed" }
 & $ssh -i $KeyPath $Server "cd '$Root/releases' && ls -1dt */ | tail -n +$($KeepReleases + 1) | xargs -r rm -rf"
 
 Write-Host "Verifying..." -ForegroundColor Cyan
-$checks = @("/", "/projects/murphy/", "/projects/wafer-wizards/", "/risk/", "/sitemap.xml")
+$checks = @(
+    "/",
+    "/projects/murphy/",
+    "/projects/wafer-wizards/",
+    "/risk/",
+    "/sitemap.xml"
+)
 $failed = @()
 foreach ($path in $checks) {
     $url = "https://connorskudlarek.com$path"
