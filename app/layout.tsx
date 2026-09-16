@@ -25,6 +25,7 @@ export const metadata: Metadata = {
     template: `%s · ${site.name}`,
   },
   description: site.description,
+  verification: { google: "Ix-VE0h_C9L2gRqXTMDf-i0PHvRjUP0G8c7SHK8GXpc" },
   keywords: [
     "Connor Skudlarek",
     "equipment engineer",
